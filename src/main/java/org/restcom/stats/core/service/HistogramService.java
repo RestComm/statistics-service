@@ -29,12 +29,4 @@ public class HistogramService {
         pm.insertAsync(histogram, "histogram");
         return Response.status(Response.Status.OK).build();
     }  
-    
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, String> testHistogram() {
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("service", "histogram");
-        return result;
-    }
 }

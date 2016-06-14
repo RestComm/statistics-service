@@ -29,12 +29,4 @@ public class CounterService {
         pm.insertAsync(counter, "counter");
         return Response.status(Response.Status.OK).build();
     }
-    
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, String> testCounter() {
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("service", "counter");
-        return result;
-    }
 }

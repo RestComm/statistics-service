@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.restcom.stats.core.config;
 
 import java.util.HashSet;
@@ -17,7 +12,7 @@ import org.restcom.stats.core.service.TimerService;
 
 /**
  *
- * @author rlimonta
+ * @author Ricardo Limonta
  */
 @ApplicationPath("/rest")
 public class ApplicationConfig extends Application {
