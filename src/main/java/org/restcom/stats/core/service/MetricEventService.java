@@ -33,8 +33,7 @@ public class MetricEventService implements Serializable {
                                               .append("totalEvents", new Document("$sum", 1))
                                               .append("lastEvent", new Document("$max", "$timestamp"))));
         //exec query
-        MongoCursor<Document> result = dbm.getCollection(
-                metricType.getCollectionName()).aggregate(params).iterator();
+        MongoCursor<Document> result = dbm.getCollection(metricType.getCollectionName()).aggregate(params).iterator();
         
         //convert document result into dto
         if (result.hasNext()) {
@@ -50,8 +49,8 @@ public class MetricEventService implements Serializable {
         List<String> keys = new ArrayList<>();
         
         //retrieve disctinct key values
-        MongoCursor<String> result = dbm.getCollection(
-                metricType.getCollectionName()).distinct("key", String.class).iterator();
+        MongoCursor<String> result = dbm.getCollection(metricType.getCollectionName())
+                                                                              .distinct("key", String.class).iterator();
         
         while (result.hasNext()) {
             keys.add(result.next());
@@ -67,7 +66,7 @@ public class MetricEventService implements Serializable {
         List<Bson> params = new ArrayList<>();
         
         //define match criteria
-        params.add(new Document("$match", new Document("key", key)));
+        params.add(new Document("$match", new Document("key", new Document("$eq", key))));
         
         //define grouping criteria
         params.add(new Document("$group", new Document("_id", "$timestamp")
@@ -76,14 +75,12 @@ public class MetricEventService implements Serializable {
         params.add(new Document("$sort", new Document("_id", 1)));
         
         //exec query
-        MongoCursor<Document> result = dbm.getCollection(
-                metricType.getCollectionName()).aggregate(params).iterator();
+        MongoCursor<Document> result = dbm.getCollection(metricType.getCollectionName()).aggregate(params).iterator();
         
         //convert document result into dto
         while (result.hasNext()) {
             Document statsDoc = result.next();
-            metrics.add(new MetricEventDTO(new Date(statsDoc.getLong("_id")), 
-                                                    statsDoc.getInteger("totalCount")));          
+            metrics.add(new MetricEventDTO(new Date(statsDoc.getLong("_id")), statsDoc.getInteger("totalCount")));          
         }
         
         return metrics;

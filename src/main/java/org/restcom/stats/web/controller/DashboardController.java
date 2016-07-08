@@ -51,8 +51,9 @@ public class DashboardController implements Serializable {
     
     @PostConstruct
     public void init() {
-        //retrieve keys metrics of selected metric type
-        this.metricKeys = metricService.retrieveMetricKeys(metricType);
+        //retrieve metric keys
+        this.retrieveMetricKeys();
+        
         //load statistics
         this.retrieveStatistics();
     }
@@ -87,6 +88,24 @@ public class DashboardController implements Serializable {
         this.updateChart();
     }
     
+    public void changeMetricType() {
+        //reload metric keys
+        this.retrieveMetricKeys();
+        
+        //reload chart
+        this.retrieveChartStatistics();
+    }
+    
+    private void retrieveMetricKeys() {
+        //retrieve keys metrics of selected metric type
+        this.metricKeys = metricService.retrieveMetricKeys(metricType);
+        
+        //set default metrici key
+        if (!this.metricKeys.isEmpty()) {
+           this.keySelected = this.metricKeys.get(0);
+        }
+    }
+    
     private void updateChart() {
         
         //reset chart
@@ -118,6 +137,9 @@ public class DashboardController implements Serializable {
         //clear data
         metricsChart.clear();
         
+        //define chart title
+        metricsChart.setTitle(metricType.toString());
+        
         //define legend position
         metricsChart.setLegendPlacement(LegendPlacement.INSIDE);
         metricsChart.setLegendPosition("ne");
@@ -129,9 +151,9 @@ public class DashboardController implements Serializable {
         //create X Axit like Date
         DateAxis axis = new DateAxis();
         axis.setTickAngle(-50);
+        axis.setMin("07-07 16:00");
         metricsChart.getAxes().put(AxisType.X, axis);
     }
-    
     
     public MetricEventDTO getCounterStatus() {
         return counterStatus;

@@ -82,15 +82,14 @@
                             <h:panelGroup>
                                 <p:selectOneRadio id="metricType" value="#{dashboardController.metricType}">
                                   <f:selectItems value="#{dashboardController.metricType.values()}"/>
-                                  <p:ajax event="change" update="gridChartButtons metricChart" listener="#{dashboardController.retrieveChartStatistics()}"/>
+                                  <p:ajax event="change" update="metricChart metricKeys" listener="#{dashboardController.changeMetricType()}"/>
                                 </p:selectOneRadio>
                             </h:panelGroup>
                             <h:panelGroup>
                                 <div style="width: 100%; text-align: right">
                                     <p:outputLabel value="KEY: "/>
                                     <p:spacer width="5"/>
-                                    <p:selectOneMenu id="metricKey" value="#{dashboardController.keySelected}">
-                                        <f:selectItem itemLabel="Select..." itemValue=""/>
+                                    <p:selectOneMenu id="metricKeys" value="#{dashboardController.keySelected}">
                                         <f:selectItems value="#{dashboardController.metricKeys}"/>
                                         <p:ajax event="change" update="metricChart" listener="#{dashboardController.retrieveChartStatistics()}"/>
                                     </p:selectOneMenu>  
