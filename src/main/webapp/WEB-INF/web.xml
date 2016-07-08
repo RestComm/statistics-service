@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+    </context-param>
+    <context-param>
+        <param-name>app.resources</param-name>
+        <param-value>org.restcom.stats.web.resources.ApplicationResources</param-value>
+    </context-param>
+    <context-param>
+        <param-name>primefaces.THEME</param-name>
+        <param-value>cupertino</param-value>
+    </context-param>
+    <context-param>
+        <param-name>javax.faces.INTERPRET_EMPTY_STRING_SUBMITTED_VALUES_AS_NULL</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <context-param>
+        <param-name>primefaces.FONT_AWESOME</param-name>
+        <param-value>true</param-value>
+    </context-param>
+    <mime-mapping>
+        <extension>eot</extension>
+        <mime-type>application/vnd.ms-fontobject</mime-type>
+    </mime-mapping>
+    <mime-mapping>  
+        <extension>otf</extension>  
+        <mime-type>font/opentype</mime-type>  
+    </mime-mapping>      
+    <mime-mapping>  
+        <extension>ttf</extension>  
+        <mime-type>application/x-font-ttf</mime-type>  
+    </mime-mapping>      
+    <mime-mapping>  
+        <extension>woff</extension>  
+        <mime-type>application/x-font-woff</mime-type>  
+    </mime-mapping>
+    <mime-mapping>  
+        <extension>woff2</extension>  
+        <mime-type>application/x-font-woff2</mime-type>  
+    </mime-mapping>
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Default Page -->
+    <welcome-file-list>
+        <welcome-file>pages/dashboard/dashboard.xhtml</welcome-file>
+    </welcome-file-list>
+    
+    <!-- Session Timeout -->
+    <session-config>
+        <session-timeout>
+            120
+        </session-timeout>
+    </session-config>
+            
+    <!-- Security Constraints  -->
+    <security-constraint>
+        <display-name>DashboardConstraint</display-name>
+        <web-resource-collection>
+            <web-resource-name>Dashboard</web-resource-name>
+            <description/>
+            <url-pattern>/pages/dashboard/dashboard.xhtml</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <description/>
+            <role-name>Administrator</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <description/>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+    
+    <!-- Authentication Strategy -->
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>ApplicationRealm</realm-name>
+        <form-login-config>
+            <form-login-page>/pages/login/login.xhtml</form-login-page>
+            <form-error-page>/pages/login/login.xhtml</form-error-page>
+        </form-login-config>
+    </login-config>
+    
+    <!-- Roles definition -->
+    <security-role>
+        <description/>
+        <role-name>Administrator</role-name>
+    </security-role>
+
+</web-app>

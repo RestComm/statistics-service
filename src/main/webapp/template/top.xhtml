@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+<h:form>
+    <div class="top-menu-align">
+        <ui:include src="menu.xhtml"/>
+    </div>
+    <div class="top-logo-align">
+        <p:graphicImage value="/resources/images/logo-telestax-white.png" style="margin-top: 10px"/>
+    </div>
+    <div class="top-menu-align right-menu">
+        <p:button icon="fa fa-folder-open"/>
+        <p:spacer width="5"/>
+        <p:commandButton action="#{loginController.logout}" icon="fa fa-power-off"/>                    
+    </div>
+</h:form>
+</html>

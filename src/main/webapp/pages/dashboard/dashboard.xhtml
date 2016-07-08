@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <ui:composition template="/template/layout.xhtml">
+        <ui:define name="breadcrumb">
+            <span class="fa fa-area-chart bc-icon"/>
+            <p:spacer width="5"/>
+            <h:outputText value="#{msgs['uc.dashboard.page.title']}" styleClass="bc-title"/>
+        </ui:define>
+        <ui:define name="content">
+            <h:form>
+                <p:tabView style="width: 98%; text-align: left">
+                    <p:tab title="#{msgs['uc.dashboard.tab.general']}">
+                        <h:panelGrid columns="4" width="100%" id="gridTotais">
+                            <h:panelGroup>
+                                <div class="dash-box">
+                                    <span class="fa fa-list-ol dash-box-icon"/>
+                                    <h:outputText value="#{dashboardController.counterStatus.totalEvents}" styleClass="dash-box-title-value"/>
+                                    <br/>
+                                    <span class="dash-box-title">Couters</span>
+                                    <br/>
+                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <p:spacer width="5"/>
+                                    <h:outputText value="#{dashboardController.counterStatus.timestamp}" styleClass="dash-box-text-content-value">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
+                                    </h:outputText>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup>
+                                <div class="dash-box">
+                                    <span class="fa fa-history dash-box-icon"/>
+                                    <h:outputText value="#{dashboardController.histogramStatus.totalEvents}" styleClass="dash-box-title-value"/>
+                                    <br/>
+                                    <span class="dash-box-title">Histograms</span>
+                                    <br/>
+                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <p:spacer width="5"/>
+                                    <h:outputText value="#{dashboardController.histogramStatus.timestamp}" styleClass="dash-box-text-content-value">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
+                                    </h:outputText>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup>
+                                <div class="dash-box">
+                                    <span class="fa fa-tachometer dash-box-icon"/>
+                                    <h:outputText value="#{dashboardController.meterStatus.totalEvents}" styleClass="dash-box-title-value"/>
+                                    <br/>
+                                    <span class="dash-box-title">Meters</span>
+                                    <br/>
+                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <p:spacer width="5"/>
+                                    <h:outputText value="#{dashboardController.meterStatus.timestamp}" styleClass="dash-box-text-content-value">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
+                                    </h:outputText>
+                                </div>
+                            </h:panelGroup>
+                            <h:panelGroup>
+                                <div class="dash-box">
+                                    <span class="fa fa-clock-o dash-box-icon"/>
+                                    <h:outputText value="#{dashboardController.timerStatus.totalEvents}" styleClass="dash-box-title-value"/>
+                                    <br/>
+                                    <span class="dash-box-title">Timers</span>
+                                    <br/>
+                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <p:spacer width="5"/>
+                                    <h:outputText value="#{dashboardController.timerStatus.timestamp}" styleClass="dash-box-text-content-value">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
+                                    </h:outputText>
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                        <p:spacer height="20"/>
+                        <h:panelGrid width="100%" columns="2" id="gridChart"> 
+                            <p:chart type="line" model="#{dashboardController.metricsChart}" style="height:250px; width: 100%" id="metricChart"/>
+                        </h:panelGrid>
+                        <p:spacer height="10"/>
+                        <h:panelGrid width="100%" columns="2" id="gridChartButtons">                    
+                            <h:panelGroup>
+                                <p:selectOneRadio id="metricType" value="#{dashboardController.metricType}">
+                                  <f:selectItems value="#{dashboardController.metricType.values()}"/>
+                                  <p:ajax event="change" update="gridChartButtons metricChart" listener="#{dashboardController.retrieveChartStatistics()}"/>
+                                </p:selectOneRadio>
+                            </h:panelGroup>
+                            <h:panelGroup>
+                                <div style="width: 100%; text-align: right">
+                                    <p:outputLabel value="KEY: "/>
+                                    <p:spacer width="5"/>
+                                    <p:selectOneMenu id="metricKey" value="#{dashboardController.keySelected}">
+                                        <f:selectItem itemLabel="Select..." itemValue=""/>
+                                        <f:selectItems value="#{dashboardController.metricKeys}"/>
+                                        <p:ajax event="change" update="metricChart" listener="#{dashboardController.retrieveChartStatistics()}"/>
+                                    </p:selectOneMenu>  
+                                </div>
+                            </h:panelGroup>
+                        </h:panelGrid>
+                    </p:tab>
+                </p:tabView>     
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

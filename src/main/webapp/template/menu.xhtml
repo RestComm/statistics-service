@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" 
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:form>
+        <p:commandButton id="btnMenu" icon="fa fa-bars" ajax="false"/>
+        <p:menu widgetVar="menu"  
+                trigger="btnMenu" 
+                triggerEvent="click" 
+                overlay="true" 
+                my="left top" 
+                at="left bottom">
+            <p:submenu label="#{msgs['uc.menu.system.title']}">
+                <p:menuitem value="#{msgs['uc.menu.system.users']}" 
+                            url="#" 
+                            ajax="false" 
+                            icon="fa fa-user"/>
+                <p:menuitem value="#{msgs['uc.menu.system.group']}" 
+                            url="#" 
+                            ajax="false" 
+                            icon="fa fa-group"/>
+                <p:menuitem value="#{msgs['uc.menu.system.sysconfig']}" 
+                            url="#" 
+                            ajax="false" 
+                            icon="fa fa-cog"/>
+            </p:submenu>
+        </p:menu>
+    </h:form>
+</html>

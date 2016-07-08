@@ -1,4 +1,4 @@
-package org.restcom.stats.core.service;
+package org.restcom.stats.core.ws;
 
 import java.util.Map;
 import javax.inject.Inject;
@@ -13,17 +13,17 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
 /**
  * @author Ricardo Limonta
  */
-@Path(value = "/gauge")
+@Path(value = "/counter")
 @Named
-public class GaugeService {
+public class CounterWS {
     
     @Inject
     private PersistenceUtil pm;
     
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
-    public Response insertGauge(Map<String, Object> gauge) {
-        pm.insertAsync(gauge, "gauge");
+    public Response insertCounter(Map<String, Object> counter) {
+        pm.insert(counter, "counter");
         return Response.status(Response.Status.OK).build();
-    }   
+    }
 }

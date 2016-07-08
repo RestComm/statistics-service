@@ -1,10 +1,9 @@
 package org.restcom.stats.core.persistence;
 
-import com.mongodb.ConnectionString;
-import com.mongodb.async.client.MongoClient;
-import com.mongodb.async.client.MongoClients;
-import com.mongodb.async.client.MongoCollection;
-import com.mongodb.async.client.MongoDatabase;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import java.io.Serializable;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Named;
@@ -16,23 +15,23 @@ import org.bson.Document;
  */
 @Singleton
 @Named
-public class DatabaseManager {
+public class DatabaseManager implements Serializable {
 
     private static MongoClient mongoClient;
     private static MongoDatabase database;
 
     @PostConstruct
-    private void startup() {
-        mongoClient = MongoClients.create(new ConnectionString("mongodb://localhost"));
+    public void startup() {
+        mongoClient = new MongoClient();
         database = mongoClient.getDatabase("restcomm-stats");
     }
-
+    
     public MongoCollection<Document> getCollection(String collectionName) {
         return database.getCollection(collectionName);
     }
     
     @PreDestroy
-    private void shutdown() {
+    public void shutdown() {
         mongoClient.close();
     }
 }

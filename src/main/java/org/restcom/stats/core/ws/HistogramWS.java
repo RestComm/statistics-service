@@ -1,14 +1,11 @@
-package org.restcom.stats.core.service;
+package org.restcom.stats.core.ws;
 
-import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.restcom.stats.core.persistence.PersistenceUtil;
@@ -18,7 +15,7 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
  */
 @Path(value = "/histogram")
 @Named
-public class HistogramService {
+public class HistogramWS {
 
     @Inject
     private PersistenceUtil pm;
@@ -26,7 +23,7 @@ public class HistogramService {
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response insertHistogram(Map<String, Object> histogram) {
-        pm.insertAsync(histogram, "histogram");
+        pm.insert(histogram, "histogram");
         return Response.status(Response.Status.OK).build();
     }  
 }

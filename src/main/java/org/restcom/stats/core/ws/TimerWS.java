@@ -1,4 +1,4 @@
-package org.restcom.stats.core.service;
+package org.restcom.stats.core.ws;
 
 import java.util.Map;
 import javax.inject.Inject;
@@ -14,17 +14,17 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
  *
  * @author Ricardo Limonta
  */
-@Path(value = "/meter")
+@Path(value = "/timer")
 @Named
-public class MeterService {
+public class TimerWS {
 
     @Inject
     private PersistenceUtil pm;
     
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
-    public Response insertMeter(Map<String, Object> meter) {
-        pm.insertAsync(meter, "meter");
+    public Response insertTimer(Map<String, Object> timer) {
+        pm.insert(timer, "timer");
         return Response.status(Response.Status.OK).build();
-    }   
+    }  
 }

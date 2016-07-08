@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <f:view>
+        <h:head>
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+            <h:outputScript name="jquery/jquery.js" library="primefaces"/>
+            <h:outputStylesheet name="css/statistics.css"/>
+            <ui:insert name="js"/>
+            <ui:insert name="css"/>
+            <title>#{msgs['global.application.title']}</title>
+        </h:head>
+        <h:body styleClass="page-login">
+            <h:form>      
+                <p:growl/>
+                <p:panel id="panelLogin" styleClass="box-login">
+                    <h:graphicImage value="/resources/images/logo.png" 
+                                    style="margin-top: 10px"/>
+                    <p:inputText value="#{loginController.username}" 
+                                 id="username"
+                                 label="username"
+                                 required="true"
+                                 placeholder="Enter your username" 
+                                 style="width: 300px; margin-top: 15px"/>
+                    <p:password value="#{loginController.password}"  
+                                id="password"
+                                label="password"
+                                required="true"
+                                placeholder="Enter your password" 
+                                style="width: 300px; margin-top: 15px"/>
+                    <p:commandButton value="Login" 
+                                     action="#{loginController.login()}" 
+                                     ajax="false" 
+                                     style="width: 300px; margin-top: 15px; margin-bottom: 15px"/>
+                    
+                    <p:graphicImage value="/resources/images/logo-telestax.png" style="margin-top: 15px;"/>
+                </p:panel>
+            </h:form>
+        </h:body>
+    </f:view>
+</html>
