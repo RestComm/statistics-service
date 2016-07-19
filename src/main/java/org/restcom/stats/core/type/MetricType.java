@@ -23,7 +23,7 @@ package org.restcom.stats.core.type;
  */
 public enum MetricType {
 
-    COUNTER("counter"), HISTOGRAM("histogram"), METER("meter"), TIMER("timer");
+    COUNTER("counter"), HISTOGRAM("histogram"), METER("meter"), TIMER("timer"), GAUGE("gauge");
 
     private final String collectionName;
 

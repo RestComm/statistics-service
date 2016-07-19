@@ -21,13 +21,13 @@ package org.restcom.stats.core.service;
 import com.mongodb.client.MongoCursor;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.restcom.stats.core.dto.MetricStatusDTO;
+import org.restcom.stats.core.dto.MeterDTO;
 import org.restcom.stats.core.persistence.DatabaseManager;
 import org.restcom.stats.core.type.MetricType;
 
@@ -35,20 +35,21 @@ import org.restcom.stats.core.type.MetricType;
  * @author Ricardo Limonta
  */
 @Named
-public class MetricEventService implements Serializable {
+public class MeterService implements Serializable {
     
     @Inject
     private DatabaseManager dbm;
     
     /**
-     * Retrieve metric status from interval timestamps.
-     * @param fromTime timestamp from.
-     * @param toTime timestemp to.
-     * @param metricType Metric type.
-     * @return metric status.
+     * Insert histogram metrics from map.
+     * @param value histogram metric attributes.
      */
-    public MetricStatusDTO restrieveStatus(long fromTime, long toTime, MetricType metricType) {
-        MetricStatusDTO status = new MetricStatusDTO();
+    public void insertMetric(Map<String, Object> value) {
+        dbm.getCollection(MetricType.METER.getCollectionName()).insertOne(new Document(value));
+    }
+    
+    public List<MeterDTO> retrieveMetrics(long fromTime, long toTime, String key) {
+        List<MeterDTO> meters = new ArrayList<>();
         
         //create params list
         List<Bson> params = new ArrayList<>();
@@ -56,40 +57,24 @@ public class MetricEventService implements Serializable {
         //define match criteria
         params.add(new Document("$match", new Document("timestamp", new Document("$gte", fromTime))));
         params.add(new Document("$match", new Document("timestamp", new Document("$lte", toTime))));
+        params.add(new Document("$match", new Document("key", new Document("$eq", key))));
         
         //define grouping criteria
-        params.add(new Document("$group", new Document("_id", "status")
-                                              .append("totalEvents", new Document("$sum", 1))
-                                              .append("lastEvent", new Document("$max", "$timestamp"))));
+        params.add(new Document("$group", new Document("_id", "$timestamp")
+                                              .append("totalCount", new Document("$sum", "$count"))));
+        //define order criteria
+        params.add(new Document("$sort", new Document("_id", 1)));
+        
         //exec query
-        MongoCursor<Document> result = dbm.getCollection(metricType.getCollectionName()).aggregate(params).iterator();
+        MongoCursor<Document> result = dbm.getCollection(MetricType.METER.getCollectionName())
+                                                                                          .aggregate(params).iterator();
         
         //convert document result into dto
-        if (result.hasNext()) {
-            Document statsDoc = result.next();
-            status.setTotalEvents(statsDoc.getInteger("totalEvents"));
-            status.setTimestamp(new Date(statsDoc.getLong("lastEvent")));            
-        }
-        
-        return status;
-    }
-    
-    /**
-     * Retrieve metric keys.
-     * @param metricType Metric type.
-     * @return metric keys.
-     */
-    public List<String> retrieveMetricKeys(MetricType metricType) {
-        List<String> keys = new ArrayList<>();
-        
-        //retrieve disctinct key values
-        MongoCursor<String> result = dbm.getCollection(metricType.getCollectionName())
-                                                                              .distinct("key", String.class).iterator();
-        
         while (result.hasNext()) {
-            keys.add(result.next());
+            Document statsDoc = result.next();
+            meters.add(new MeterDTO(statsDoc.getLong("_id"), statsDoc.getInteger("totalCount")));          
         }
         
-        return keys;
+        return meters;
     }
 }

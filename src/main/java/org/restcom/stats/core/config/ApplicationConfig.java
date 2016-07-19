@@ -36,7 +36,7 @@ import org.restcom.stats.core.ws.TimerWS;
 public class ApplicationConfig extends Application {
      @Override
     public Set<Class<?>> getClasses() {
-        final Set<Class<?>> returnValue = new HashSet<Class<?>>();
+        final Set<Class<?>> returnValue = new HashSet<>();
         returnValue.add(CounterWS.class);
         returnValue.add(GaugeWS.class);
         returnValue.add(HistogramWS.class);

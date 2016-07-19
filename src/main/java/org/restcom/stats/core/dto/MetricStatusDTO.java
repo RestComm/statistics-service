@@ -25,15 +25,15 @@ import java.util.Objects;
 /**
  * @author Ricardo Limonta
  */
-public class MetricEventDTO implements Serializable {
+public class MetricStatusDTO implements Serializable {
     private Date timestamp;
     private long totalEvents;
 
-    public MetricEventDTO() {
+    public MetricStatusDTO() {
         super();
     }
 
-    public MetricEventDTO(Date timestamp, long totalEvents) {
+    public MetricStatusDTO(Date timestamp, long totalEvents) {
         super();
         this.timestamp = timestamp;
         this.totalEvents = totalEvents;
@@ -74,7 +74,7 @@ public class MetricEventDTO implements Serializable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final MetricEventDTO other = (MetricEventDTO) obj;
+        final MetricStatusDTO other = (MetricStatusDTO) obj;
         if (this.totalEvents != other.totalEvents) {
             return false;
         }

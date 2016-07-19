@@ -15,15 +15,15 @@
             <h:form>
                 <p:tabView style="width: 98%; text-align: left">
                     <p:tab title="#{msgs['uc.dashboard.tab.general']}">
-                        <h:panelGrid columns="4" width="100%" id="gridTotais">
+                        <h:panelGrid columns="4" width="100%" id="gridTotals">
                             <h:panelGroup>
                                 <div class="dash-box">
                                     <span class="fa fa-list-ol dash-box-icon"/>
                                     <h:outputText value="#{dashboardController.counterStatus.totalEvents}" styleClass="dash-box-title-value"/>
                                     <br/>
-                                    <span class="dash-box-title">Couters</span>
+                                    <span class="dash-box-title">#{msgs['uc.dashboard.counters']}</span>
                                     <br/>
-                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <h:outputLabel value="#{msgs['uc.dashboard.status.box.lastevent']}:" styleClass="dash-box-text-content-label"/>
                                     <p:spacer width="5"/>
                                     <h:outputText value="#{dashboardController.counterStatus.timestamp}" styleClass="dash-box-text-content-value">
                                         <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
@@ -35,9 +35,9 @@
                                     <span class="fa fa-history dash-box-icon"/>
                                     <h:outputText value="#{dashboardController.histogramStatus.totalEvents}" styleClass="dash-box-title-value"/>
                                     <br/>
-                                    <span class="dash-box-title">Histograms</span>
+                                    <span class="dash-box-title">#{msgs['uc.dashboard.histograms']}</span>
                                     <br/>
-                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <h:outputLabel value="#{msgs['uc.dashboard.status.box.lastevent']}:" styleClass="dash-box-text-content-label"/>
                                     <p:spacer width="5"/>
                                     <h:outputText value="#{dashboardController.histogramStatus.timestamp}" styleClass="dash-box-text-content-value">
                                         <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
@@ -49,9 +49,9 @@
                                     <span class="fa fa-tachometer dash-box-icon"/>
                                     <h:outputText value="#{dashboardController.meterStatus.totalEvents}" styleClass="dash-box-title-value"/>
                                     <br/>
-                                    <span class="dash-box-title">Meters</span>
+                                    <span class="dash-box-title">#{msgs['uc.dashboard.meters']}</span>
                                     <br/>
-                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <h:outputLabel value="#{msgs['uc.dashboard.status.box.lastevent']}:" styleClass="dash-box-text-content-label"/>
                                     <p:spacer width="5"/>
                                     <h:outputText value="#{dashboardController.meterStatus.timestamp}" styleClass="dash-box-text-content-value">
                                         <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
@@ -63,9 +63,9 @@
                                     <span class="fa fa-clock-o dash-box-icon"/>
                                     <h:outputText value="#{dashboardController.timerStatus.totalEvents}" styleClass="dash-box-title-value"/>
                                     <br/>
-                                    <span class="dash-box-title">Timers</span>
+                                    <span class="dash-box-title">#{msgs['uc.dashboard.timers']}</span>
                                     <br/>
-                                    <h:outputLabel value="Last Event:" styleClass="dash-box-text-content-label"/>
+                                    <h:outputLabel value="#{msgs['uc.dashboard.status.box.lastevent']}:" styleClass="dash-box-text-content-label"/>
                                     <p:spacer width="5"/>
                                     <h:outputText value="#{dashboardController.timerStatus.timestamp}" styleClass="dash-box-text-content-value">
                                         <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
@@ -73,26 +73,82 @@
                                 </div>
                             </h:panelGroup>
                         </h:panelGrid>
-                        <p:spacer height="20"/>
-                        <h:panelGrid width="100%" columns="2" id="gridChart"> 
-                            <p:chart type="line" model="#{dashboardController.metricsChart}" style="height:250px; width: 100%" id="metricChart"/>
+                        <p:spacer height="5"/>
+                        <h:panelGrid style="width: 100%" columns="2" cellspacing="3" cellpadding="3">
+                            <p:panel id="panelCounter" header="#{msgs['uc.dashboard.counters']}">
+                                <p:chart type="line" model="#{dashboardController.counterChart}" style="height:260px; width: 100%" id="counterChart"/>
+                                <div style="width: 100%; text-align: right">
+                                    <p:outputLabel value="#{msgs['uc.dashboard.counters.key']}:"/>
+                                    <p:spacer width="5"/>
+                                    <p:selectOneMenu id="counterKeys" value="#{dashboardController.counterKey}">
+                                        <f:selectItems value="#{dashboardController.counterKeys}"/>
+                                        <p:ajax event="change" update="counterChart" listener="#{dashboardController.retrieveCounterStatistics()}"/>
+                                    </p:selectOneMenu>  
+                                </div>
+                            </p:panel>
+                            <p:panel id="panelHistogram" header="#{msgs['uc.dashboard.histograms']}">
+                                <p:chart type="line" model="#{dashboardController.histogramChart}" style="height:260px; width: 100%" id="histogramChart"/>
+                                <div style="width: 100%; text-align: right">
+                                    <p:outputLabel value="#{msgs['uc.dashboard.histograms.key']}:"/>
+                                    <p:spacer width="5"/>
+                                    <p:selectOneMenu id="histogramsKeys" value="#{dashboardController.histogramKey}">
+                                        <f:selectItems value="#{dashboardController.histogramKeys}"/>
+                                        <p:ajax event="change" update="histogramChart" listener="#{dashboardController.retrieveHistogramStatistics()}"/>
+                                    </p:selectOneMenu>  
+                                </div>
+                            </p:panel>
+                            <p:panel id="panelMeter" header="#{msgs['uc.dashboard.meters']}">
+                                <p:chart type="line" model="#{dashboardController.meterChart}" style="height:260px; width: 100%" id="meterChart"/>
+                                <div style="width: 100%; text-align: right">
+                                    <p:outputLabel value="#{msgs['uc.dashboard.meters.key']}:"/>
+                                    <p:spacer width="5"/>
+                                    <p:selectOneMenu id="metersKeys" value="#{dashboardController.meterKey}">
+                                        <f:selectItems value="#{dashboardController.meterKeys}"/>
+                                        <p:ajax event="change" update="meterChart" listener="#{dashboardController.retrieveMeterStatistics()}"/>
+                                    </p:selectOneMenu>  
+                                </div>
+                            </p:panel>
+                            <p:panel id="panelTimer" header="#{msgs['uc.dashboard.timers']}">
+                                <p:chart type="line" model="#{dashboardController.timerChart}" style="height:260px; width: 100%" id="timerChart"/>
+                                <div style="width: 100%; text-align: right">
+                                    <p:outputLabel value="#{msgs['uc.dashboard.timers.key']}:"/>
+                                    <p:spacer width="5"/>
+                                    <p:selectOneMenu id="timersKeys" value="#{dashboardController.timerKey}">
+                                        <f:selectItems value="#{dashboardController.timerKeys}"/>
+                                        <p:ajax event="change" update="timerChart" listener="#{dashboardController.retrieveTimerStatistics()}"/>
+                                    </p:selectOneMenu>  
+                                </div>
+                            </p:panel>
                         </h:panelGrid>
-                        <p:spacer height="10"/>
-                        <h:panelGrid width="100%" columns="2" id="gridChartButtons">                    
+                        <p:spacer height="5"/>
+                        <h:panelGrid style="width: 100%" columns="2">
                             <h:panelGroup>
-                                <p:selectOneRadio id="metricType" value="#{dashboardController.metricType}">
-                                  <f:selectItems value="#{dashboardController.metricType.values()}"/>
-                                  <p:ajax event="change" update="metricChart metricKeys" listener="#{dashboardController.changeMetricType()}"/>
-                                </p:selectOneRadio>
+                                <p:outputLabel value="#{msgs['uc.dashboard.updateinterval']}:"/>
+                                <p:spacer width="5"/>
+                                <p:selectOneMenu id="updateInterval">
+                                    <f:selectItem itemLabel="30"  itemValue="30"/>
+                                    <f:selectItem itemLabel="60"  itemValue="60"/>
+                                    <f:selectItem itemLabel="90"  itemValue="90"/>
+                                    <f:selectItem itemLabel="120" itemValue="120"/>
+                                    <f:selectItem itemLabel="150" itemValue="150"/>
+                                    <p:ajax event="change" 
+                                            update="gridTotals counterChart histogramChart meterChart timerChart" 
+                                            listener="#{dashboardController.retrieveAllStatistics()}"/>
+                                </p:selectOneMenu>
                             </h:panelGroup>
                             <h:panelGroup>
-                                <div style="width: 100%; text-align: right">
-                                    <p:outputLabel value="KEY: "/>
+                                <div style="width: 100%; text-align: right;">
+                                    <p:outputLabel value="#{msgs['uc.dashboard.datefrom']}:"/>
                                     <p:spacer width="5"/>
-                                    <p:selectOneMenu id="metricKeys" value="#{dashboardController.keySelected}">
-                                        <f:selectItems value="#{dashboardController.metricKeys}"/>
-                                        <p:ajax event="change" update="metricChart" listener="#{dashboardController.retrieveChartStatistics()}"/>
-                                    </p:selectOneMenu>  
+                                    <p:calendar value="#{dashboardController.fromDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                    <p:spacer width="10"/>
+                                    <p:outputLabel value="#{msgs['uc.dashboard.dateto']}:"/>
+                                    <p:spacer width="5"/>
+                                    <p:calendar value="#{dashboardController.toDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                    <p:spacer width="10"/>
+                                    <p:commandButton action="#{dashboardController.retrieveAllStatistics()}" 
+                                                     update="gridTotals counterChart histogramChart meterChart timerChart" 
+                                                     icon="fa fa-refresh"/>
                                 </div>
                             </h:panelGroup>
                         </h:panelGrid>

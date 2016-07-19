@@ -18,15 +18,20 @@
  */
 package org.restcom.stats.core.ws;
 
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.restcom.stats.core.persistence.PersistenceUtil;
+import org.restcom.stats.core.dto.GaugeDTO;
+import org.restcom.stats.core.service.GaugeService;
 
 /**
  * @author Ricardo Limonta
@@ -36,12 +41,23 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
 public class GaugeWS {
     
     @Inject
-    private PersistenceUtil pm;
+    private GaugeService gaugeService;
     
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response insertGauge(Map<String, Object> gauge) {
-        pm.insert(gauge, "gauge");
+        gaugeService.insertMetric(gauge);
         return Response.status(Response.Status.OK).build();
-    }   
+    }
+    
+    @GET
+    @Path("{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveGaugesByKey(@PathParam("timestampFrom") long timestampFrom, 
+                                        @PathParam("timestampTo") long timestampTo, 
+                                        @PathParam("key") String key) {
+
+       List<GaugeDTO> histograms = gaugeService.retrieveMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(histograms).build();
+    }
 }

@@ -21,6 +21,8 @@ package org.restcom.stats.web.controller;
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
@@ -31,8 +33,16 @@ import org.primefaces.model.chart.DateAxis;
 import org.primefaces.model.chart.LegendPlacement;
 import org.primefaces.model.chart.LineChartModel;
 import org.primefaces.model.chart.LineChartSeries;
-import org.restcom.stats.core.dto.MetricEventDTO;
+import org.restcom.stats.core.dto.CounterDTO;
+import org.restcom.stats.core.dto.HistogramDTO;
+import org.restcom.stats.core.dto.MeterDTO;
+import org.restcom.stats.core.dto.MetricStatusDTO;
+import org.restcom.stats.core.dto.TimerDTO;
+import org.restcom.stats.core.service.CounterService;
+import org.restcom.stats.core.service.HistogramService;
+import org.restcom.stats.core.service.MeterService;
 import org.restcom.stats.core.service.MetricEventService;
+import org.restcom.stats.core.service.TimerService;
 import org.restcom.stats.core.type.MetricType;
 
 /**
@@ -46,198 +56,432 @@ public class DashboardController implements Serializable {
     @Inject
     private MetricEventService metricService;
     
-    private MetricEventDTO counterStatus;
-    private MetricEventDTO histogramStatus;
-    private MetricEventDTO meterStatus;
-    private MetricEventDTO timerStatus;
-
-    private MetricType metricType = MetricType.COUNTER;
-    private List<String> metricKeys;
-    private String keySelected;
-    private List<MetricEventDTO> metrics;
+    @Inject
+    private CounterService counterService;
     
-    private final LineChartModel metricsChart;
+    @Inject
+    private HistogramService histogramService;
+     
+    @Inject
+    private MeterService meterService;
+    
+    @Inject
+    private TimerService timerService;
+    
+    private MetricStatusDTO counterStatus, histogramStatus, meterStatus, timerStatus;
+    private List<CounterDTO> counterMetrics;
+    private List<HistogramDTO> histogramMetrics;
+    private List<MeterDTO> meterMetrics;
+    private List<TimerDTO> timerMetrics;
+    private List<String> counterKeys, histogramKeys, meterKeys, timerKeys;
+    private String counterKey, histogramKey, meterKey, timerKey;
+    private final LineChartModel counterChart, histogramChart, meterChart, timerChart;
     private final DateFormat fmt;
+    private final Calendar cal;
+    private Date fromDate, toDate;
     
     public DashboardController() {
         super();
         
-        //init chart
-        this.metricsChart = new LineChartModel();
+        //retrieve calendar instance
+        this.cal = Calendar.getInstance();
+        
+        //init counter chart
+        this.counterChart = new LineChartModel();
+        this.counterChart.setLegendPlacement(LegendPlacement.INSIDE);
+        this.counterChart.setLegendPosition("ne");
+        this.counterChart.setSeriesColors("F08080");
+        
+        //init histogram chart
+        this.histogramChart = new LineChartModel();
+        this.histogramChart.setLegendPlacement(LegendPlacement.INSIDE);
+        this.histogramChart.setLegendPosition("ne");
+        this.histogramChart.setSeriesColors("2288AA");
+        
+        //init meter chart
+        this.meterChart = new LineChartModel();
+        this.meterChart.setLegendPlacement(LegendPlacement.INSIDE);
+        this.meterChart.setLegendPosition("ne");
+        this.meterChart.setSeriesColors("58BA27");
+        
+        //init timer chart
+        this.timerChart = new LineChartModel();
+        this.timerChart.setLegendPlacement(LegendPlacement.INSIDE);
+        this.timerChart.setLegendPosition("ne");
+        this.timerChart.setSeriesColors("A30303");
+        
+        //define date mask
         this.fmt = new SimpleDateFormat("MM-dd HH:mm");
     }
     
     @PostConstruct
     public void init() {
+        //set fromDate to 0 hour of day
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        this.fromDate = cal.getTime();
+
+        //set toDate to end hour of day
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        this.toDate = cal.getTime();
+
         //retrieve metric keys
         this.retrieveMetricKeys();
         
-        //load statistics
-        this.retrieveStatistics();
+        //retrieve all statistics
+        this.retrieveAllStatistics();
     }
 
-    public void retrieveStatistics() {
+    public void retrieveAllStatistics() {
         
         //retrieve the last counter status
-        this.counterStatus = metricService.restrieveStatus(MetricType.COUNTER);
+        this.counterStatus = metricService.restrieveStatus(fromDate.getTime(), toDate.getTime(), MetricType.COUNTER);
         
         //retrieve the last histogram status
-        this.histogramStatus = metricService.restrieveStatus(MetricType.HISTOGRAM);
+        this.histogramStatus = metricService.restrieveStatus(fromDate.getTime(), toDate.getTime(), MetricType.HISTOGRAM);
         
         //retrieve the last meter status
-        this.meterStatus = metricService.restrieveStatus(MetricType.METER);
+        this.meterStatus = metricService.restrieveStatus(fromDate.getTime(), toDate.getTime(), MetricType.METER);
         
         //retrieve the last timer status
-        this.timerStatus = metricService.restrieveStatus(MetricType.TIMER);
+        this.timerStatus = metricService.restrieveStatus(fromDate.getTime(), toDate.getTime(), MetricType.TIMER);
 
-        //retrieve chart statistics
-        this.retrieveChartStatistics();
+        //retrieve counter statistics
+        this.retrieveCounterStatistics();
+        
+        //retrieve histogram statistics
+        this.retrieveHistogramStatistics();
+        
+        //retrieve meter statistics
+        this.retrieveMeterStatistics();
+        
+        //retrieve timer statistics
+        this.retrieveTimerStatistics();
     }
     
-    public void retrieveChartStatistics() {
-        
-        //retrieve keys metrics of selected metric type
-        this.metricKeys = metricService.retrieveMetricKeys(metricType);
-        
+    /**
+     * Retrieve Counter Statistics.
+     */
+    public void retrieveCounterStatistics() {        
         //retrieve metrics
-        this.metrics = metricService.retrieveMetrics(this.metricType, this.keySelected);
+        this.counterMetrics = counterService.retrieveMetrics(fromDate.getTime(), toDate.getTime(), this.counterKey);
         
         //update chart
-        this.updateChart();
+        this.updateCouterChart();
     }
     
-    public void changeMetricType() {
-        //reload metric keys
-        this.retrieveMetricKeys();
+    /**
+     * Retrieve Histogram Statistics.
+     */
+    public void retrieveHistogramStatistics() {        
+        //retrieve metrics
+        this.histogramMetrics = histogramService.retrieveMetrics(fromDate.getTime(), toDate.getTime(), this.histogramKey);
         
-        //reload chart
-        this.retrieveChartStatistics();
+        //update chart
+        this.updateHistogramChart();
     }
     
-    private void retrieveMetricKeys() {
-        //retrieve keys metrics of selected metric type
-        this.metricKeys = metricService.retrieveMetricKeys(metricType);
+    /**
+     * Retrieve Meter Statistics.
+     */
+    public void retrieveMeterStatistics() {        
+        //retrieve metrics
+        this.meterMetrics = meterService.retrieveMetrics(fromDate.getTime(), toDate.getTime(), this.meterKey);
         
-        //set default metrici key
-        if (!this.metricKeys.isEmpty()) {
-           this.keySelected = this.metricKeys.get(0);
-        }
+        //update chart
+        this.updateMeterChart();
     }
     
-    private void updateChart() {
+    /**
+     * Retrieve Timer Statistics.
+     */
+    public void retrieveTimerStatistics() {        
+        //retrieve metrics
+        this.timerMetrics = timerService.retrieveMetrics(fromDate.getTime(), toDate.getTime(), this.timerKey);
         
-        //reset chart
-        this.setupChart();
-        
-        LineChartSeries keyMetricSerie = new LineChartSeries();
-        
-        //create default serie
-        keyMetricSerie.setLabel(keySelected);
-        keyMetricSerie.setFill(true);
-        
-        //add default value for empty result
-        if (metrics.isEmpty()) {
-            keyMetricSerie.set("01-01 00:00", 0);
-        } else {
-            for (MetricEventDTO item : metrics) {
-                keyMetricSerie.set(fmt.format(item.getTimestamp()), item.getTotalEvents());
-            }
-        }
-        
-        //ajuste a formatacao do label do grafico de acordo com o tipo de periodo
-        metricsChart.getAxis(AxisType.X).setTickFormat("%m-%d %H:%M");
-
-        //adiciona as series no grafico
-        metricsChart.addSeries(keyMetricSerie);
+        //update chart
+        this.updateTimerChart();
     }
-
-    private void setupChart() {
+    
+    /**
+     * Clear and Update Counter Chart.
+     */
+    private void updateCouterChart() {
+        
         //clear data
-        metricsChart.clear();
+        counterChart.clear();
         
-        //define chart title
-        metricsChart.setTitle(metricType.toString());
-        
-        //define legend position
-        metricsChart.setLegendPlacement(LegendPlacement.INSIDE);
-        metricsChart.setLegendPosition("ne");
-        metricsChart.setSeriesColors("F08080");
-        
-        //Define min value for Axis Y
-        metricsChart.getAxis(AxisType.Y).setMin(0);
+        //set Y Axis min
+        counterChart.getAxis(AxisType.Y).setMin(0);
         
         //create X Axit like Date
         DateAxis axis = new DateAxis();
         axis.setTickAngle(-50);
-        axis.setMin("07-07 16:00");
-        metricsChart.getAxes().put(AxisType.X, axis);
+        axis.setMin(fmt.format(this.fromDate));
+        counterChart.getAxes().put(AxisType.X, axis);
+        
+        LineChartSeries counterSerie = new LineChartSeries();
+        
+        //create default serie
+        counterSerie.setLabel(counterKey);
+        counterSerie.setFill(true);
+        
+        //add default value for empty result
+        if (counterMetrics.isEmpty()) {
+            counterSerie.set(fmt.format(fromDate), 0.0);
+        } else {
+            for (CounterDTO counter : counterMetrics) {
+                counterSerie.set(fmt.format(new Date(counter.getTimestamp())), counter.getCount());
+            }
+        }
+        
+        //format X Axis label
+        counterChart.getAxis(AxisType.X).setTickFormat("%m-%d %H:%M");
+
+        //add default serie
+        counterChart.addSeries(counterSerie);
     }
     
-    public MetricEventDTO getCounterStatus() {
+    /**
+     * Clear and Update Histogram Chart.
+     */
+    private void updateHistogramChart() {
+        
+        //clear data
+        histogramChart.clear();
+        
+        //set Y Axis min
+        histogramChart.getAxis(AxisType.Y).setMin(0);
+        
+        //create X Axit like Date
+        DateAxis histogramDateAxis = new DateAxis();
+        histogramDateAxis.setTickAngle(-50);
+        histogramDateAxis.setMin(fmt.format(this.fromDate));
+        histogramChart.getAxes().put(AxisType.X, histogramDateAxis);
+        
+        LineChartSeries histogramSerie = new LineChartSeries();
+        
+        //create default serie
+        histogramSerie.setLabel(this.histogramKey);
+        histogramSerie.setFill(true);
+        
+        //add default value for empty result
+        if (histogramMetrics.isEmpty()) {
+            histogramSerie.set(fmt.format(fromDate), 0.0);
+        } else {
+            for (HistogramDTO hist : histogramMetrics) {
+                histogramSerie.set(fmt.format(new Date(hist.getTimestamp())), hist.getCount());
+            }
+        }
+        
+        //format X Axis label
+        histogramChart.getAxis(AxisType.X).setTickFormat("%m-%d %H:%M");
+
+        //add default serie
+        histogramChart.addSeries(histogramSerie);
+    }
+    
+    /**
+     * Clear and Update Meter Chart.
+     */
+    private void updateMeterChart() {
+        
+        //clear data
+        meterChart.clear();
+        
+        //set Y Axis min
+        meterChart.getAxis(AxisType.Y).setMin(0);
+        
+        //create X Axit like Date
+        DateAxis meterDateAxis = new DateAxis();
+        meterDateAxis.setTickAngle(-50);
+        meterDateAxis.setMin(fmt.format(this.fromDate));
+        meterChart.getAxes().put(AxisType.X, meterDateAxis);
+        
+        LineChartSeries meterSerie = new LineChartSeries();
+        
+        //create default serie
+        meterSerie.setLabel(this.meterKey);
+        meterSerie.setFill(true);
+        
+        //add default value for empty result
+        if (meterMetrics.isEmpty()) {
+            meterSerie.set(fmt.format(fromDate), 0.0);
+        } else {
+            for (MeterDTO meter : meterMetrics) {
+                meterSerie.set(fmt.format(new Date(meter.getTimestamp())), meter.getCount());
+            }
+        }
+        
+        //format X Axis label
+        meterChart.getAxis(AxisType.X).setTickFormat("%m-%d %H:%M");
+
+        //add default serie
+        meterChart.addSeries(meterSerie);
+    }
+
+    /**
+     * Clear and Update Timer Chart.
+     */
+    private void updateTimerChart() {
+        
+        //clear data
+        timerChart.clear();
+        
+        //set Y Axis min
+        timerChart.getAxis(AxisType.Y).setMin(0);
+        
+        //create X Axit like Date
+        DateAxis timerDateAxis = new DateAxis();
+        timerDateAxis.setTickAngle(-50);
+        timerDateAxis.setMin(fmt.format(this.fromDate));
+        timerChart.getAxes().put(AxisType.X, timerDateAxis);
+        
+        LineChartSeries timerSerie = new LineChartSeries();
+        
+        //create default serie
+        timerSerie.setLabel(this.timerKey);
+        timerSerie.setFill(true);
+        
+        //add default value for empty result
+        if (timerMetrics.isEmpty()) {
+            timerSerie.set(fmt.format(fromDate), 0.0);
+        } else {
+            for (TimerDTO timer : timerMetrics) {
+                timerSerie.set(fmt.format(new Date(timer.getTimestamp())), timer.getCount());
+            }
+        }
+        
+        //format X Axis label
+        timerChart.getAxis(AxisType.X).setTickFormat("%m-%d %H:%M");
+
+        //add default serie
+        timerChart.addSeries(timerSerie);
+    }
+    
+    /**
+     * Load Metric Keys.
+     */
+    private void retrieveMetricKeys() {
+        //retrieve counter keys
+        this.counterKeys = metricService.retrieveMetricKeys(MetricType.COUNTER);
+        //set default counter key
+        if (!this.counterKeys.isEmpty()) this.counterKey = this.counterKeys.get(0);
+
+        //retrieve histogram keys
+        this.histogramKeys = metricService.retrieveMetricKeys(MetricType.HISTOGRAM);
+        //set default histogram key
+        if (!this.histogramKeys.isEmpty()) this.histogramKey = this.histogramKeys.get(0);
+
+        //retrieve meter keys
+        this.meterKeys = metricService.retrieveMetricKeys(MetricType.METER);
+        //set default meter key
+        if (!this.meterKeys.isEmpty()) this.meterKey = this.meterKeys.get(0);
+
+        //retrieve timer keys
+        this.timerKeys = metricService.retrieveMetricKeys(MetricType.TIMER);
+        //set default timer key
+        if (!this.timerKeys.isEmpty()) this.timerKey = this.timerKeys.get(0);
+    }
+    
+    public MetricStatusDTO getCounterStatus() {
         return counterStatus;
     }
 
-    public void setCounterStatus(MetricEventDTO counterStatus) {
-        this.counterStatus = counterStatus;
-    }
-
-    public MetricEventService getCounterService() {
-        return metricService;
-    }
-
-    public void setCounterService(MetricEventService counterService) {
-        this.metricService = counterService;
-    }
-
-    public MetricEventDTO getHistogramStatus() {
+    public MetricStatusDTO getHistogramStatus() {
         return histogramStatus;
     }
 
-    public void setHistogramStatus(MetricEventDTO histogramStatus) {
-        this.histogramStatus = histogramStatus;
-    }
-
-    public MetricEventDTO getMeterStatus() {
+    public MetricStatusDTO getMeterStatus() {
         return meterStatus;
     }
 
-    public void setMeterStatus(MetricEventDTO meterStatus) {
-        this.meterStatus = meterStatus;
-    }
-
-    public MetricEventDTO getTimerStatus() {
+    public MetricStatusDTO getTimerStatus() {
         return timerStatus;
     }
 
-    public void setTimerStatus(MetricEventDTO timerStatus) {
-        this.timerStatus = timerStatus;
+    public String getCounterKey() {
+        return counterKey;
     }
 
-    public MetricType getMetricType() {
-        return metricType;
+    public void setCounterKey(String counterKey) {
+        this.counterKey = counterKey;
     }
 
-    public void setMetricType(MetricType metricType) {
-        this.metricType = metricType;
+    public String getHistogramKey() {
+        return histogramKey;
     }
 
-    public List<String> getMetricKeys() {
-        return metricKeys;
+    public void setHistogramKey(String histogramKey) {
+        this.histogramKey = histogramKey;
     }
 
-    public void setMetricKeys(List<String> metricKeys) {
-        this.metricKeys = metricKeys;
+    public String getMeterKey() {
+        return meterKey;
     }
 
-    public String getKeySelected() {        
-        return keySelected;
+    public void setMeterKey(String meterKey) {
+        this.meterKey = meterKey;
     }
 
-    public void setKeySelected(String keySelected) {
-        this.keySelected = keySelected;
+    public String getTimerKey() {
+        return timerKey;
     }
 
-    public LineChartModel getMetricsChart() {
-        return metricsChart;
+    public void setTimerKey(String timerKey) {
+        this.timerKey = timerKey;
+    }
+
+    public List<String> getCounterKeys() {
+        return counterKeys;
+    }
+
+    public List<String> getHistogramKeys() {
+        return histogramKeys;
+    }
+
+    public List<String> getMeterKeys() {
+        return meterKeys;
+    }
+
+    public List<String> getTimerKeys() {
+        return timerKeys;
+    }
+
+    public LineChartModel getCounterChart() {
+        return counterChart;
+    }
+
+    public LineChartModel getHistogramChart() {
+        return histogramChart;
+    }
+
+    public LineChartModel getMeterChart() {
+        return meterChart;
+    }
+
+    public LineChartModel getTimerChart() {
+        return timerChart;
+    }
+    
+    public Date getFromDate() {
+        return fromDate;
+    }
+
+    public void setFromDate(Date fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public Date getToDate() {
+        return toDate;
+    }
+
+    public void setToDate(Date toDate) {
+        this.toDate = toDate;
     }
 }

@@ -18,15 +18,20 @@
  */
 package org.restcom.stats.core.ws;
 
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.restcom.stats.core.persistence.PersistenceUtil;
+import org.restcom.stats.core.dto.MeterDTO;
+import org.restcom.stats.core.service.MeterService;
 
 /**
  *
@@ -35,14 +40,25 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
 @Path(value = "/meter")
 @Named
 public class MeterWS {
-
+    
     @Inject
-    private PersistenceUtil pm;
+    MeterService meterService;
     
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response insertMeter(Map<String, Object> meter) {
-        pm.insert(meter, "meter");
+        meterService.insertMetric(meter);
         return Response.status(Response.Status.OK).build();
-    }   
+    }
+    
+    @GET
+    @Path("{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveMetersByKey(@PathParam("timestampFrom") long timestampFrom, 
+                                        @PathParam("timestampTo") long timestampTo, 
+                                        @PathParam("key") String key) {
+
+       List<MeterDTO> histograms = meterService.retrieveMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(histograms).build();
+    }
 }

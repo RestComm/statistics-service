@@ -18,15 +18,20 @@
  */
 package org.restcom.stats.core.ws;
 
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.restcom.stats.core.persistence.PersistenceUtil;
+import org.restcom.stats.core.dto.HistogramDTO;
+import org.restcom.stats.core.service.HistogramService;
 
 /**
  * @author Ricardo Limonta
@@ -36,12 +41,23 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
 public class HistogramWS {
 
     @Inject
-    private PersistenceUtil pm;
+    private HistogramService histogramService;
     
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response insertHistogram(Map<String, Object> histogram) {
-        pm.insert(histogram, "histogram");
+        histogramService.insertMetric(histogram);
         return Response.status(Response.Status.OK).build();
     }  
+    
+    @GET
+    @Path("{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveHistogramsByKey(@PathParam("timestampFrom") long timestampFrom, 
+                                            @PathParam("timestampTo") long timestampTo, 
+                                            @PathParam("key") String key) {
+
+       List<HistogramDTO> histograms = histogramService.retrieveMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(histograms).build();
+    }
 }

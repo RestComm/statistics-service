@@ -18,15 +18,20 @@
  */
 package org.restcom.stats.core.ws;
 
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.restcom.stats.core.persistence.PersistenceUtil;
+import org.restcom.stats.core.dto.TimerDTO;
+import org.restcom.stats.core.service.TimerService;
 
 /**
  *
@@ -37,12 +42,23 @@ import org.restcom.stats.core.persistence.PersistenceUtil;
 public class TimerWS {
 
     @Inject
-    private PersistenceUtil pm;
+    private TimerService timerService;
     
     @POST
     @Consumes(value = MediaType.APPLICATION_JSON)
     public Response insertTimer(Map<String, Object> timer) {
-        pm.insert(timer, "timer");
+        timerService.insertMetric(timer);
         return Response.status(Response.Status.OK).build();
     }  
+    
+    @GET
+    @Path("{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveTimersByKey(@PathParam("timestampFrom") long timestampFrom, 
+                                        @PathParam("timestampTo") long timestampTo, 
+                                        @PathParam("key") String key) {
+
+       List<TimerDTO> histograms = timerService.retrieveMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(histograms).build();
+    }
 }
