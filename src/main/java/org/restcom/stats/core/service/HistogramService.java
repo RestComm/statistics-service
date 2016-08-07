@@ -57,7 +57,7 @@ public class HistogramService implements Serializable {
         //define match criteria
         params.add(new Document("$match", new Document("timestamp", new Document("$gte", fromTime))));
         params.add(new Document("$match", new Document("timestamp", new Document("$lte", toTime))));
-        params.add(new Document("$match", new Document("key", new Document("$eq", key))));
+        params.add(new Document("$match", new Document("key", key)));
         
         //define grouping criteria
         params.add(new Document("$group", new Document("_id", "$timestamp")

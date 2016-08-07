@@ -19,6 +19,7 @@
  */package org.restcom.stats.core.persistence;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import java.io.Serializable;
@@ -40,7 +41,7 @@ public class DatabaseManager implements Serializable {
 
     @PostConstruct
     public void startup() {
-        mongoClient = new MongoClient();
+        mongoClient = new MongoClient(new MongoClientURI(System.getenv("OPENSHIFT_MONGODB_DB_URL")));
         database = mongoClient.getDatabase("restcomm-stats");
     }
     
