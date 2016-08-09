@@ -100,9 +100,3 @@ Put you **username** and **password**.
 
 ![Create a new application](images/step_13.png)
 
-
-Then you must make a git clone of your OpenShift environment. 
-Example:
-
-_git clone ssh://[you enviroment url]_
-
