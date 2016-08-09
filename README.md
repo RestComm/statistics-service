@@ -85,7 +85,7 @@ Now you need run **./add-user.sh** script
 
 03) Define your **password**;
 
-04) Define your group name called **Administrator**. This is very because the web module uses this group internally. 
+04) Define your group name called **Administrator**. This is very important because the web module uses this group internally. 
 
 
 **Step 07 -** Deploy Statistics Web Module
