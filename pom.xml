@@ -10,7 +10,7 @@
 
     <groupId>org.restcomm.statistics.service</groupId>
     <artifactId>statistics-service</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.3</version>
     <packaging>war</packaging>
 
     <name>Restcomm Statistics Service</name>
