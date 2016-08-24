@@ -76,4 +76,32 @@ public class CounterService implements Serializable {
         
         return counters;
     }
+    
+    // https://github.com/RestComm/statistics-service/issues/1
+    public List<CounterDTO> retrieveSumMetrics(long fromTime, long toTime, String key) {
+        List<CounterDTO> counters = new ArrayList<>();
+        
+        //create params list
+        List<Bson> params = new ArrayList<>();
+        
+        //define match criteria
+        params.add(new Document("$match", new Document("timestamp", new Document("$gte", fromTime))));
+        params.add(new Document("$match", new Document("timestamp", new Document("$lte", toTime))));
+        params.add(new Document("$match", new Document("key", key)));
+        
+        //define grouping criteria
+        params.add(new Document("$group", new Document("_id", "null")
+                                              .append("totalCount", new Document("$sum", "$count"))));
+        
+        //exec query
+        MongoCursor<Document> result = dbm.getCollection(MetricType.COUNTER.getCollectionName()).aggregate(params).iterator();
+        
+        //convert document result into dto
+        while (result.hasNext()) {
+            Document statsDoc = result.next();
+            counters.add(new CounterDTO(statsDoc.getLong("_id"), statsDoc.getInteger("totalCount")));          
+        }
+        
+        return counters;
+    }
 }

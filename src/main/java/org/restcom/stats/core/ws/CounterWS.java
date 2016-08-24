@@ -61,4 +61,17 @@ public class CounterWS {
        return Response.status(200).entity(counters).build();
 
     }
+    
+    // https://github.com/RestComm/statistics-service/issues/1
+    @GET
+    @Path("/sum/{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveTotalCountersSum(@PathParam("timestampFrom") long timestampFrom, 
+                                          @PathParam("timestampTo") long timestampTo, 
+                                          @PathParam("key") String key) {
+
+       List<CounterDTO> counters = counterService.retrieveSumMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(counters).build();
+
+    }
 }
