@@ -19,14 +19,18 @@
 package org.restcom.stats.core.service;
 
 import com.mongodb.client.MongoCursor;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.restcom.stats.core.dto.CounterDTO;
 import org.restcom.stats.core.dto.GaugeDTO;
 import org.restcom.stats.core.persistence.DatabaseManager;
 import org.restcom.stats.core.type.MetricType;
@@ -73,6 +77,34 @@ public class GaugeService implements Serializable {
         while (result.hasNext()) {
             Document statsDoc = result.next();
             gauges.add(new GaugeDTO(statsDoc.getLong("_id"), statsDoc.getInteger("totalCount")));          
+        }
+        
+        return gauges;
+    }
+    
+    // https://github.com/RestComm/statistics-service/issues/1
+    public List<GaugeDTO> retrieveSumMetrics(long fromTime, long toTime, String key) {
+        List<GaugeDTO> gauges = new ArrayList<>();
+        
+        //create params list
+        List<Bson> params = new ArrayList<>();
+        
+        //define match criteria
+        params.add(new Document("$match", new Document("timestamp", new Document("$gte", fromTime))));
+        params.add(new Document("$match", new Document("timestamp", new Document("$lte", toTime))));
+        params.add(new Document("$match", new Document("key", key)));
+        
+        //define grouping criteria
+        params.add(new Document("$group", new Document("_id", "null")
+                                              .append("totalCount", new Document("$sum", "$count"))));
+        
+        //exec query
+        MongoCursor<Document> result = dbm.getCollection(MetricType.GAUGE.getCollectionName()).aggregate(params).iterator();
+        
+        //convert document result into dto
+        while (result.hasNext()) {
+            Document statsDoc = result.next();
+            gauges.add(new GaugeDTO(toTime, statsDoc.getInteger("totalCount")));          
         }
         
         return gauges;
