@@ -99,7 +99,7 @@ public class CounterService implements Serializable {
         //convert document result into dto
         while (result.hasNext()) {
             Document statsDoc = result.next();
-            counters.add(new CounterDTO(statsDoc.getLong("_id"), statsDoc.getInteger("totalCount")));          
+            counters.add(new CounterDTO(toTime, statsDoc.getInteger("totalCount")));          
         }
         
         return counters;
