@@ -111,11 +111,10 @@ public class DashboardController implements Serializable {
         this.timerChart.setSeriesColors("A30303");
         
         //define date mask
-        this.fmt = new SimpleDateFormat("MM-dd HH:mm");
+        this.fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
     
-    @PostConstruct
-    public void init() {
+    public void load() {
         //set fromDate to 0 hour of day
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -228,12 +227,12 @@ public class DashboardController implements Serializable {
         LineChartSeries counterSerie = new LineChartSeries();
         
         //create default serie
-        counterSerie.setLabel(counterKey);
+        counterSerie.setLabel(this.counterKey);
         counterSerie.setFill(true);
         
         //add default value for empty result
         if (counterMetrics.isEmpty()) {
-            counterSerie.set(fmt.format(fromDate), 0.0);
+            counterSerie.set(fmt.format(fromDate), 0);
         } else {
             for (CounterDTO counter : counterMetrics) {
                 counterSerie.set(fmt.format(new Date(counter.getTimestamp())), counter.getCount());
@@ -268,11 +267,12 @@ public class DashboardController implements Serializable {
         
         //create default serie
         histogramSerie.setLabel(this.histogramKey);
+        
         histogramSerie.setFill(true);
         
         //add default value for empty result
         if (histogramMetrics.isEmpty()) {
-            histogramSerie.set(fmt.format(fromDate), 0.0);
+            histogramSerie.set(fmt.format(fromDate), 0);
         } else {
             for (HistogramDTO hist : histogramMetrics) {
                 histogramSerie.set(fmt.format(new Date(hist.getTimestamp())), hist.getCount());
@@ -307,11 +307,12 @@ public class DashboardController implements Serializable {
         
         //create default serie
         meterSerie.setLabel(this.meterKey);
+        
         meterSerie.setFill(true);
         
         //add default value for empty result
         if (meterMetrics.isEmpty()) {
-            meterSerie.set(fmt.format(fromDate), 0.0);
+            meterSerie.set(fmt.format(fromDate), 0);
         } else {
             for (MeterDTO meter : meterMetrics) {
                 meterSerie.set(fmt.format(new Date(meter.getTimestamp())), meter.getCount());
@@ -350,7 +351,7 @@ public class DashboardController implements Serializable {
         
         //add default value for empty result
         if (timerMetrics.isEmpty()) {
-            timerSerie.set(fmt.format(fromDate), 0.0);
+            timerSerie.set(fmt.format(fromDate), 0);
         } else {
             for (TimerDTO timer : timerMetrics) {
                 timerSerie.set(fmt.format(new Date(timer.getTimestamp())), timer.getCount());
