@@ -62,7 +62,7 @@
         </session-timeout>
     </session-config>
                                     
-    <!-- Security Constraints  -->
+    <!-- Security Constraints Dashboard -->
     <security-constraint>
         <display-name>DashboardConstraint</display-name>
         <web-resource-collection>
@@ -89,7 +89,7 @@
             <form-error-page>/pages/login/login.xhtml</form-error-page>
         </form-login-config>
     </login-config>
-    
+            
     <!-- Roles definition -->
     <security-role>
         <description/>
