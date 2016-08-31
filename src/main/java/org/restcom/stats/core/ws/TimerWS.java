@@ -61,4 +61,17 @@ public class TimerWS {
        List<TimerDTO> histograms = timerService.retrieveMetrics(timestampFrom, timestampTo, key);
        return Response.status(200).entity(histograms).build();
     }
+    
+    // https://github.com/RestComm/statistics-service/issues/1
+    @GET
+    @Path("/sum/{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveTotalCountersSum(@PathParam("timestampFrom") long timestampFrom, 
+                                          @PathParam("timestampTo") long timestampTo, 
+                                          @PathParam("key") String key) {
+
+       List<TimerDTO> timers = timerService.retrieveSumMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(timers).build();
+
+    }
 }

@@ -60,4 +60,17 @@ public class HistogramWS {
        List<HistogramDTO> histograms = histogramService.retrieveMetrics(timestampFrom, timestampTo, key);
        return Response.status(200).entity(histograms).build();
     }
+    
+    // https://github.com/RestComm/statistics-service/issues/1
+    @GET
+    @Path("/sum/{timestampFrom}/{timestampTo}/{key}")
+    @Produces(value = MediaType.APPLICATION_JSON)
+    public Response retrieveTotalCountersSum(@PathParam("timestampFrom") long timestampFrom, 
+                                          @PathParam("timestampTo") long timestampTo, 
+                                          @PathParam("key") String key) {
+
+       List<HistogramDTO> histograms = histogramService.retrieveSumMetrics(timestampFrom, timestampTo, key);
+       return Response.status(200).entity(histograms).build();
+
+    }
 }
